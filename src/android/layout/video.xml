@@ -1,0 +1,50 @@
+<FrameLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+
+    <FrameLayout
+        android:id="@+id/mainFrame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="right|bottom"
+        android:id="@+id/linearLayout">
+
+        <TextView
+            android:id="@+id/waiting_notification"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/waiting_notification"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:gravity="right|bottom"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/hang_up"
+            android:id="@+id/btn_hang_up"
+            android:layout_gravity="right" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="120dp"
+        android:layout_height="160dp"
+        android:layout_marginBottom="40dp"
+        android:layout_marginLeft="20dp"
+        android:layout_gravity="left|bottom"
+        android:id="@+id/localVideoFrame"
+        android:background="#ddd"/>
+
+</FrameLayout>
