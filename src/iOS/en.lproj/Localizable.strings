@@ -1,0 +1,30 @@
+/* 
+  Localizable.strings
+  AgoraDemo
+
+  Created by apple on 15/10/20.
+  Copyright (c) 2015年 apple. All rights reserved.
+*/
+
+"agora_call" = "Agora Easy Call";
+"room" = "Room";
+"enter_key" = "Enter Vendor Key";
+"enter_room" = "Enter Room No.";
+"join_video" = "Join Video Call";
+"join_voice" = "Join Voice Call";
+"video_call" = "Video Call";
+"voice_call" = "Voice Call";
+"key_empty" = "Key can not be empty";
+"room_empty" = "Room No. can not be empty";
+"mute" = "Mute";
+"speaker" = "Speaker";
+"camera_off" = "Camera Off";
+"switch_camera" = "Switch Camera";
+"wait_attendees" = "Waiting for attendees\n...";
+"no_network" = "No network connection, please check your network\n...";
+"enter_key_room" = "Please Enter Vendor Key and Room No.";
+"done" = "Done";
+"exiting" = "Exiting...";
+"wrong_key" = "Wrong Vendor Key";
+"total_time" = "Total Time";
+"total_trafic" = "Total Trafic";

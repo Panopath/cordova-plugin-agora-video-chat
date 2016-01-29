@@ -17,6 +17,32 @@
     <clobbers target="agora"/>
   </js-module>
 
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="Agora">
+        <param name="ios-package" value="AgoraPlugin" />
+      </feature>
+    </config-file>
+    <header-file src="src/iOS/agora.h"/>
+    <source-file src="src/iOS/agora.m"/>
+    <header-file src="src/iOS/Chat/AGDChatViewController.h" target-dir=""/>
+    <source-file src="src/iOS/Chat/AGDChatViewController.m" target-dir=""/>
+    <header-file src="src/iOS/Chat/AGDChatCell.h" target-dir=""/>
+    <source-file src="src/iOS/Chat/AGDChatCell.m" target-dir=""/>
+    <framework src="src/iOS/lib/AgoraRtcEngineKit.framework" custom="true"/>
+    <source-file src="src/iOS/lib/Crasheye/libCrasheye.a" framework="true"/>
+    <header-file src="src/iOS/lib/Crasheye/Crasheye.h" target-dir=""/>
+    <resource-file src="src/iOS/ChatView.storyboard" target-dir=""/>
+    <resource-file src="src/iOS/Images.xcassets" target-dir=""/>
+    <framework src="AudioToolbox.framework"></framework>
+    <framework src="AVFoundation.framework"></framework>
+    <framework src="CoreMedia.framework"></framework>
+    <framework src="CoreTelephony.framework"></framework>
+    <framework src="CoreMotion.framework"></framework>
+    <framework src="SystemConfiguration.framework"></framework>
+    <framework src="libc++.dylib"></framework>
+    <framework src="libz.dylib"></framework>
+  </platform>
   <!-- android -->
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">

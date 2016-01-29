@@ -1,0 +1,57 @@
+
+/* Class = "UILabel"; text = "通话时间"; ObjectID = "2Fn-KB-3Ee"; */
+"2Fn-KB-3Ee.text" = "Total Time";
+
+/* Class = "UILabel"; text = "扬声器"; ObjectID = "4ze-xb-XB2"; */
+"4ze-xb-XB2.text" = "Speaker";
+
+/* Class = "UILabel"; text = "流量"; ObjectID = "Haq-ut-UHf"; */
+"Haq-ut-UHf.text" = "Total Trafic";
+
+/* Class = "UIButton"; normalTitle = "视频通话"; ObjectID = "L2i-es-R5N"; */
+"L2i-es-R5N.normalTitle" = "Video Call";
+
+/* Class = "UILabel"; text = "关闭摄像头"; ObjectID = "N1q-JC-d3c"; */
+"N1q-JC-d3c.text" = "Camera Off";
+
+/* Class = "UITextField"; placeholder = "输入厂商key"; ObjectID = "aLG-KF-ZgU"; */
+"aLG-KF-ZgU.placeholder" = "Enter Vendor Key";
+
+/* Class = "UILabel"; text = "进入视频通话"; ObjectID = "chT-TA-Bcv"; */
+"chT-TA-Bcv.text" = "Join Video Call";
+
+/* Class = "UILabel"; text = "稳定完美视频通话体验"; ObjectID = "hVE-cW-fxv"; */
+"hVE-cW-fxv.text" = "High Quality Conferencing Experience";
+
+/* Class = "UILabel"; text = "NAME"; ObjectID = "hrJ-ZE-JmI"; */
+"hrJ-ZE-JmI.text" = "NAME";
+
+/* Class = "UILabel"; text = "Agora—会议室"; ObjectID = "inb-7M-90L"; */
+"inb-7M-90L.text" = "Agora Easy Call";
+
+/* Class = "UIButton"; normalTitle = "会议室"; ObjectID = "jOt-YT-T9U"; */
+"jOt-YT-T9U.normalTitle" = "";
+
+/* Class = "UITextField"; placeholder = "输入房间号"; ObjectID = "qJ1-yx-GeV"; */
+"qJ1-yx-GeV.placeholder" = "Enter Room No.";
+
+/* Class = "UILabel"; text = "进入语音通话"; ObjectID = "rYx-yd-4NK"; */
+"rYx-yd-4NK.text" = "Join Voice Call";
+
+/* Class = "UIButton"; normalTitle = "语音通话"; ObjectID = "sxx-y9-2M0"; */
+"sxx-y9-2M0.normalTitle" = "Voice Call";
+
+/* Class = "UILabel"; text = "静音"; ObjectID = "v6x-ih-4qV"; */
+"v6x-ih-4qV.text" = "Mute";
+
+/* Class = "UILabel"; text = "切换摄像头"; ObjectID = "v83-6U-81z"; */
+"v83-6U-81z.text" = "Switch Camera";
+
+/* Class = "UILabel"; text = "静音"; ObjectID = "w99-d3-2xS"; */
+"w99-d3-2xS.text" = "Mute";
+
+/* Class = "UILabel"; text = "扬声器"; ObjectID = "y5S-5u-Ki0"; */
+"y5S-5u-Ki0.text" = "Speaker";
+
+/* Class = "UILabel"; text = "Agora EasyCall"; ObjectID = "za2-jT-LZl"; */
+"za2-jT-LZl.text" = "Agora EasyCall";

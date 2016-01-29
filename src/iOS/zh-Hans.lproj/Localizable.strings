@@ -1,0 +1,30 @@
+/*
+  Localizable.strings
+  AgoraDemo
+
+  Created by apple on 15/10/20.
+  Copyright (c) 2015年 apple. All rights reserved.
+*/
+
+"agora_call" = "会议室";
+"room" = "房间";
+"enter_key" = "输入厂商Key";
+"enter_room" = "输入房间号码";
+"join_video" = "进入视频通话";
+"join_voice" = "进入语音通话";
+"video_call" = "视频通话";
+"voice_call" = "语音通话";
+"key_empty" = "Key不能为空";
+"room_empty" = "房间号不能为空";
+"mute" = "静音";
+"speaker" = "扬声器";
+"camera_off" = "关闭摄像头";
+"switch_camera" = "切换摄像头";
+"wait_attendees" = "房间等待好友加入\n...";
+"no_network" = "网络无法连接，请检查您的网络\n...";
+"enter_key_room" = "请输入厂商Key和房间号";
+"done" = "完成";
+"exiting" = "正在退出...";
+"wrong_key" = "厂商Key错误，请修改";
+"total_time" = "通话时间";
+"total_trafic" = "使用流量";
