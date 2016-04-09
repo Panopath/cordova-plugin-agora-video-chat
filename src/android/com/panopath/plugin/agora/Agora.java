@@ -15,8 +15,10 @@ import io.agora.rtc.video.VideoCanvas;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONStringer;
 
 public class Agora extends CordovaPlugin {
     public static final String TAG = "CDVAgora";
@@ -24,6 +26,7 @@ public class Agora extends CordovaPlugin {
     protected SurfaceView surfaceView;
     protected Activity appActivity;
     protected Context appContext;
+    private static CallbackContext eventCallbackContext;
 
     @Override
     protected void pluginInitialize() {
@@ -42,7 +45,10 @@ public class Agora extends CordovaPlugin {
             RtcEngineCreator.getInstance().setApplicationContext(this.cordova.getActivity().getApplicationContext());
             RtcEngineCreator.getInstance().setVendorKey(args.getString(0));
             return true;
+        }
 
+        if (action.equals("leaveChannel")) {
+            RtcEngineCreator.getInstance().getRtcEngine().leaveChannel();
         }
 
         if (action.equals("joinChannel")) {
@@ -69,6 +75,35 @@ public class Agora extends CordovaPlugin {
             return true;
         }
 
+        if (action.equals("listenForEvents")) {
+            eventCallbackContext = callbackContext;
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, 0);
+            pluginResult.setKeepCallback(true);
+            callbackContext.sendPluginResult(pluginResult);
+            return true;
+        }
+
         return super.execute(action, args, callbackContext);
+    }
+
+    public static void notifyEvent(String event, String data) {
+
+        JSONStringer jsonText = new JSONStringer();
+
+        try {
+            jsonText.object();
+            jsonText.key("eventName");
+            jsonText.value(event);
+            jsonText.key("data");
+            jsonText.value(data);
+            jsonText.endObject();
+        } catch (JSONException ignored) {
+        }
+
+        if (eventCallbackContext != null) {
+            PluginResult result = new PluginResult(PluginResult.Status.OK, jsonText.toString());
+            result.setKeepCallback(true);
+            eventCallbackContext.sendPluginResult(result);
+        }
     }
 }

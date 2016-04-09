@@ -12,6 +12,10 @@ public class RtcEngineCreator {
     private RtcEngine rtcEngine;
 
 
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
     public RtcEngineCreator() {
         messageHandler = new MessageHandler();
     }
@@ -32,17 +36,17 @@ public class RtcEngineCreator {
         this.vendorKey = vendorKey;
     }
 
-    public void setRtcEngine(){
-        if(rtcEngine==null) {
+    public void setRtcEngine() {
+        if (rtcEngine == null) {
             rtcEngine = RtcEngine.create(applicationContext, getVendorKey(), messageHandler);
         }
     }
 
-    public RtcEngine getRtcEngine(){
+    public RtcEngine getRtcEngine() {
         return rtcEngine;
     }
 
-    public void setEngineEventHandlerActivity(BaseEngineEventHandlerActivity engineEventHandlerActivity){
+    public void setEngineEventHandlerActivity(BaseEngineEventHandlerActivity engineEventHandlerActivity) {
         messageHandler.setActivity(engineEventHandlerActivity);
     }
 

@@ -2,13 +2,6 @@ package com.panopath.plugin.agora;
 
 import io.agora.rtc.IRtcEngineEventHandler;
 
-/**
- *
- * A handler activity act as a bridge to take callbacks from @MessageHandler.
- * Subclasses should override these key methods.
- *
- * Created by on 9/13/15.
- */
 public class BaseEngineEventHandlerActivity extends BaseActivity {
 
 
@@ -18,10 +11,22 @@ public class BaseEngineEventHandlerActivity extends BaseActivity {
     public void onRejoinChannelSuccess(String channel, int uid, int elapsed) {
     }
 
+    public void onWarning(int warn) {
+    }
+
+    public void onApiCallExecuted(String api, int error) {
+    }
+
     public void onError(int err) {
     }
 
     public void onCameraReady() {
+    }
+
+    public void onVideoStopped() {
+    }
+
+    public void onConnectionInterrupted() {
     }
 
     public void onAudioQuality(int uid, int quality, short delay, short lost) {
