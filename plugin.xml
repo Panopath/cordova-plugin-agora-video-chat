@@ -43,6 +43,7 @@
     <framework src="libc++.dylib"></framework>
     <framework src="libz.dylib"></framework>
   </platform>
+
   <!-- android -->
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
@@ -68,7 +69,14 @@
 
     <config-file target="res/values/strings.xml" parent="/resources">
       <string name="waiting_notification">正在等待其他成员加入\nWaiting for other attendees</string>
-      <string name="hang_up">结束通话</string>
+    </config-file>
+
+    <config-file target="res/values/color.xml" parent="/resources">
+      <color name="transparent">#00000000</color>
+      <color name="white">#FFFFFF</color>
+      <color name="yellow">#DCBA75</color>
+      <color name="black">#000</color>
+      <color name="remote_user_bg">#3B3E4D</color>
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -77,9 +85,24 @@
     </config-file>
 
     <source-file src="src/android/com/panopath/plugin/agora/Agora.java" target-dir="src/com/panopath/plugin/agora"/>
+    
     <source-file src="src/android/com/panopath/plugin/agora/FakeR.java" target-dir="src/com/panopath/plugin/agora"/>
+
     <source-file src="src/android/com/panopath/plugin/agora/VideoActivity.java"
                  target-dir="src/com/panopath/plugin/agora"/>
+
+    <source-file src="src/android/com/panopath/plugin/agora/BaseActivity.java"
+                 target-dir="src/com/panopath/plugin/agora"/>
+                 
+    <source-file src="src/android/com/panopath/plugin/agora/BaseEngineEventHandlerActivity.java"
+                 target-dir="src/com/panopath/plugin/agora"/>
+                 
+    <source-file src="src/android/com/panopath/plugin/agora/MessageHandler.java"
+                 target-dir="src/com/panopath/plugin/agora"/>
+                 
+    <source-file src="src/android/com/panopath/plugin/agora/RtcEngineCreator.java"
+                 target-dir="src/com/panopath/plugin/agora"/>
+                 
     <source-file src="src/android/layout/video.xml" target-dir="res/layout"/>
 
     <source-file src="src/android/libs/agora-rtc-sdk.jar" target-dir="libs"/>
