@@ -29,12 +29,12 @@ After installing this plugin, a global variable `agora` is created and is access
 Enumeration values used in Agora SDK are stored in: ```agora.Enum``` .
 Specifically, there are
 
-1. ```Enum.UserOfflineReason```
-2. ```Enum.ChannelProfile```
-3. ```Enum.VideoProfile```
-4. ```Enum.ErrorCode```
-5. ```Enum.WarnCode```
-6. ```Enum.Quality```
+1. ```agora.Enum.UserOfflineReason```
+2. ```agora.Enum.ChannelProfile```
+3. ```agora.Enum.VideoProfile```
+4. ```agora.Enum.ErrorCode```
+5. ```agora.Enum.WarnCode```
+6. ```agora.Enum.Quality```
 
 
 
@@ -86,6 +86,12 @@ Specifically, there are
 
     agora.stopLoggingAllEvents()
 
+
+## 其他
+### Android 6.0+ 权限问题
+
+Android 6.0+ 将权限改成了运行时动态向用户询问获取，可能导致插件崩溃。
+解决方法：将android:targetSdkVersion设置为19
 
 More features coming soon
 
