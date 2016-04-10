@@ -1,5 +1,6 @@
 package com.panopath.plugin.agora;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -23,53 +24,118 @@ public class VideoActivity extends BaseEngineEventHandlerActivity {
     TextView waitingNotification;
     RtcEngine mRtcEngine;
     SurfaceView localView, remoteView;
+    String lectureMode = "";
+    Integer userCount = 0;
+    Boolean lecturerInRoom = false;
+
+    @SuppressLint("SetTextI18n")
+    private void updateNotificationText() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (userCount == 0) {
+                    if (lectureMode.equals("no")) {
+                        waitingNotification.setText("正在等待其他成员加入\nWaiting for other attendees");
+                    } else if (lectureMode.equals("start")) {
+                        waitingNotification.setText("正在等待听众\nWaiting for audience");
+                    }
+                } else {
+                    if (lectureMode.equals("no") || lectureMode.equals("join")) {
+                        waitingNotification.setText("");
+                    } else {
+                        waitingNotification.setText("当前有" + userCount + "位听众\n" + userCount + " " + (userCount == 1 ? "person" : "people") + " in the room.");
+                    }
+                }
+
+                if (lectureMode.equals("join") && (!lecturerInRoom)) {
+                    waitingNotification.setText("正在等待主讲人\nWaiting for the lecturer");
+                }
+            }
+        });
+    }
 
     @Override
     public void onLeaveChannel(IRtcEngineEventHandler.RtcStats stats) {
         try {
             super.onLeaveChannel(stats);
-            Log.i(Agora.TAG, "calling finish");
             finish();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
     @Override
     public void onFirstRemoteVideoDecoded(final int uid, int width, int height, int elapsed) {
-        Log.i(Agora.TAG, "onFirstRemoteVideoDecoded");
         super.onFirstRemoteVideoDecoded(uid, width, height, elapsed);
     }
 
     @Override
     public void onUserJoined(int uid, int elapsed) {
-//            setRemoteToUid(uid);
-        Log.i(Agora.TAG, "onUserJoined:" + uid);
-        setRemoteToUid(uid);
+        if (lectureMode.equals("start")) {
+            //发起讲座时不设置remote
+        } else if (lectureMode.equals("join")) {
+            //参与讲座时，
+            //只有10000加入时才设置
+            if (uid == 10000)
+                setRemoteToUid(uid);
+        } else {
+            //普通聊天时均设置
+            setRemoteToUid(uid);
+        }
+
+
+        userCount++;
+
+        if (lectureMode.equals("join") && uid == 10000) {
+            lecturerInRoom = true;
+        }
+
+        updateNotificationText();
         super.onUserJoined(uid, elapsed);
+
     }
 
     @Override
     public void onJoinChannelSuccess(String channel, int uid, int elapsed) {
-        Log.i(Agora.TAG, "onJoinChannelSuccess,uid=" + uid);
         super.onJoinChannelSuccess(channel, uid, elapsed);
     }
 
     @Override
     public void onUserOffline(final int uid) {
+
+        if (lectureMode.equals("join") && uid == 10000) {
+            lecturerInRoom = false;
+        }
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                waitingNotification.setText("正在等待其他成员加入\nWaiting for other attendees");
+                userCount--;
+                updateNotificationText();
 
-                if (remoteView.getParent() != null)
-                    ((ViewGroup) remoteView.getParent()).removeView(remoteView);
+                if (lectureMode.equals("no")) {
 
-                if (localView.getParent() != null)
-                    ((ViewGroup) localView.getParent()).removeView(localView);
+                    //非讲座模式，需要移除remoteView
+                    //如果是讲座模式,
+                    //是主讲人的话，根本没有remoteView，无需移除
+                    //是参与者的话，要判断uid是否为10000
+                    if (remoteView.getParent() != null)
+                        ((ViewGroup) remoteView.getParent()).removeView(remoteView);
 
-                mainFrame.addView(localView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+                    //刷新localView (否则程序会崩溃)
+                    if (localView.getParent() != null)
+                        ((ViewGroup) localView.getParent()).removeView(localView);
+
+                    mainFrame.addView(localView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+                } else if (lectureMode.equals("join")) {
+
+                    //讲座模式，判断uid是否为10000，是的话移除remoteView
+                    if (uid == 10000)
+                        if (remoteView.getParent() != null)
+                            ((ViewGroup) remoteView.getParent()).removeView(remoteView);
+
+                }
             }
         });
         super.onUserOffline(uid);
@@ -79,20 +145,25 @@ public class VideoActivity extends BaseEngineEventHandlerActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                waitingNotification.setText("");
+
+                //localView 在 remoteView 前先加，否则remoteView会把localView覆盖掉
+                if (lectureMode.equals("no")) {
+                    //非讲座模式时，要有左下角小框能看到自己，所以设置localView
+
+                    if (localView.getParent() != null)
+                        ((ViewGroup) localView.getParent()).removeView(localView);
+
+                    localVideoFrame.addView(localView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+                }
+
+
+                //设置remoteView （这仅仅在非讲座模式/参与别人讲座时会触发。自己开讲座时不会触发。）
                 mRtcEngine.setupRemoteVideo(new VideoCanvas(remoteView, VideoCanvas.RENDER_MODE_ADAPTIVE, uid));
-
-
-                if (localView.getParent() != null)
-                    ((ViewGroup) localView.getParent()).removeView(localView);
-                localVideoFrame.addView(localView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-
 
                 if (remoteView.getParent() != null)
                     ((ViewGroup) remoteView.getParent()).removeView(remoteView);
 
                 mainFrame.addView(remoteView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-
             }
         });
     }
@@ -120,6 +191,7 @@ public class VideoActivity extends BaseEngineEventHandlerActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         Bundle bundle = getIntent().getExtras();
+        lectureMode = bundle.getString("lectureMode", "no");
 
         FakeR fakeR = new FakeR(this);
 
@@ -129,29 +201,39 @@ public class VideoActivity extends BaseEngineEventHandlerActivity {
         localVideoFrame = (FrameLayout) findViewById(fakeR.getId("id", "localVideoFrame"));
         waitingNotification = (TextView) findViewById(fakeR.getId("id", "waiting_notification"));
 
-
-//        mRtcEngine = RtcEngine.create(getApplicationContext(), Agora.key, handler);
-
-        // setup engine
         RtcEngineCreator.getInstance().setRtcEngine();
-
         mRtcEngine = RtcEngineCreator.getInstance().getRtcEngine();
 
-        // setup engine event activity
         RtcEngineCreator.getInstance().setEngineEventHandlerActivity(this);
 
-        mRtcEngine.enableVideo();
+        if (!lectureMode.equals("join"))
+            mRtcEngine.enableVideo();
 
         localView = RtcEngine.CreateRendererView(getApplicationContext());
         remoteView = RtcEngine.CreateRendererView(getApplicationContext());
 
-        mRtcEngine.setupLocalVideo(new VideoCanvas(localView));
-        mainFrame.addView(localView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        if (lectureMode.equals("join")) {
+            localVideoFrame.setVisibility(View.GONE);
+        } else {
+            mRtcEngine.setupLocalVideo(new VideoCanvas(localView));
+            mainFrame.addView(localView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        }
 
+        Integer UID = 0;
+
+        if (lectureMode.equals("no")) {
+            UID = bundle.getInt("optionalUID", 0);
+        } else if (lectureMode.equals("start")) {
+            UID = 10000;
+        } else if (lectureMode.equals("join")) {
+            UID = 0;
+        }
+
+        updateNotificationText();
         mRtcEngine.joinChannel(RtcEngineCreator.getInstance().getVendorKey(),
                 bundle.getString("channel"),
                 "",
-                bundle.getInt("optionalUID")
+                UID
         );
 
 
@@ -170,8 +252,5 @@ public class VideoActivity extends BaseEngineEventHandlerActivity {
                 mRtcEngine.switchCamera();
             }
         });
-
-
-        Log.i(Agora.TAG, "calling join channel");
     }
 }

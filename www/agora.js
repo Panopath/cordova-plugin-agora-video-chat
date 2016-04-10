@@ -50,8 +50,16 @@ module.exports = {
         cordova.exec(successCallback, failCallback, 'Agora', 'joinChannel', [channel, optionalUID]);
     },
 
-    leaveChannel: function () {
+    leaveChannel: function (successCallback, failCallback) {
         cordova.exec(successCallback, failCallback, 'Agora', 'leaveChannel', []);
+    },
+
+    startLecture: function (channel, successCallback, failCallback) {
+        cordova.exec(successCallback, failCallback, 'Agora', 'startLecture', [channel]);
+    },
+
+    joinLecture: function (channel, successCallback, failCallback) {
+        cordova.exec(successCallback, failCallback, 'Agora', 'joinLecture', [channel]);
     },
 
     Enum: {

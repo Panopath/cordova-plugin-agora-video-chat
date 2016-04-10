@@ -87,6 +87,16 @@ Specifically, there are
     agora.stopLoggingAllEvents()
 
 
+## 讲座模式
+
+只有一位用户（主讲人），发送视频给其他用户。
+其他用户连接，不发送视频，但可以和主讲人语音互动。
+
+    agora.startLecture(channel);
+    //作为主讲人
+    agora.joinLecture(channel);
+    //作为听众
+
 ## 其他
 ### Android 6.0+ 权限问题
 

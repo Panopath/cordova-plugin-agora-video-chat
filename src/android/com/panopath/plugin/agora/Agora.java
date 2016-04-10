@@ -59,8 +59,6 @@ public class Agora extends CordovaPlugin {
             final String channel = args.getString(0);
             final String optionalUID = args.getString(1);
 
-            Log.d(TAG, "Joining Channel " + channel);
-
             appActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -68,6 +66,51 @@ public class Agora extends CordovaPlugin {
                     Bundle bundle = new Bundle();
                     bundle.putString("channel", channel);
                     bundle.putInt("optionalUID", Integer.parseInt(optionalUID));
+                    bundle.putString("lectureMode", "no");
+                    myIntent.putExtras(bundle);
+                    appActivity.startActivity(myIntent);
+                }
+            });
+            return true;
+        }
+
+        if (action.equals("startLecture")) {
+            if (RtcEngineCreator.getInstance().getVendorKey().equals("")) {
+                callbackContext.error("call setKey() first!");
+                return false;
+            }
+
+            final String channel = args.getString(0);
+
+            appActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Intent myIntent = new Intent(appActivity, VideoActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("channel", channel);
+                    bundle.putString("lectureMode", "start");
+                    myIntent.putExtras(bundle);
+                    appActivity.startActivity(myIntent);
+                }
+            });
+            return true;
+        }
+
+        if (action.equals("joinLecture")) {
+            if (RtcEngineCreator.getInstance().getVendorKey().equals("")) {
+                callbackContext.error("call setKey() first!");
+                return false;
+            }
+
+            final String channel = args.getString(0);
+
+            appActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Intent myIntent = new Intent(appActivity, VideoActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("channel", channel);
+                    bundle.putString("lectureMode", "join");
                     myIntent.putExtras(bundle);
                     appActivity.startActivity(myIntent);
                 }
