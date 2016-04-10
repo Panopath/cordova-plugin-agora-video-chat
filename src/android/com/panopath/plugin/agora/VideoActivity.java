@@ -125,18 +125,9 @@ public class VideoActivity extends BaseEngineEventHandlerActivity {
 
         setContentView(fakeR.getId("layout", "video"));
 
-        final View goBackBtn =  findViewById(fakeR.getId("id", "btn_go_back"));
-
         mainFrame = (FrameLayout) findViewById(fakeR.getId("id", "mainFrame"));
         localVideoFrame = (FrameLayout) findViewById(fakeR.getId("id", "localVideoFrame"));
         waitingNotification = (TextView) findViewById(fakeR.getId("id", "waiting_notification"));
-
-        goBackBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
 
 
 //        mRtcEngine = RtcEngine.create(getApplicationContext(), Agora.key, handler);
@@ -162,6 +153,24 @@ public class VideoActivity extends BaseEngineEventHandlerActivity {
                 "",
                 bundle.getInt("optionalUID")
         );
+
+
+        final View goBackBtn = findViewById(fakeR.getId("id", "btn_go_back"));
+        goBackBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        final View switchCameraBtn = findViewById(fakeR.getId("id", "btn_switch_camera"));
+        switchCameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mRtcEngine.switchCamera();
+            }
+        });
+
 
         Log.i(Agora.TAG, "calling join channel");
     }

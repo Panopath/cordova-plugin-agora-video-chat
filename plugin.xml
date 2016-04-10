@@ -63,20 +63,11 @@
       <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
       <uses-permission android:name="android.permission.CAMERA"/>
-
     </config-file>
 
 
     <config-file target="res/values/strings.xml" parent="/resources">
       <string name="waiting_notification">正在等待其他成员加入\nWaiting for other attendees</string>
-    </config-file>
-
-    <config-file target="res/values/color.xml" parent="/resources">
-      <color name="transparent">#00000000</color>
-      <color name="white">#FFFFFF</color>
-      <color name="yellow">#DCBA75</color>
-      <color name="black">#000</color>
-      <color name="remote_user_bg">#3B3E4D</color>
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -103,14 +94,20 @@
     <source-file src="src/android/com/panopath/plugin/agora/RtcEngineCreator.java"
                  target-dir="src/com/panopath/plugin/agora"/>
                  
-    <source-file src="src/android/layout/video.xml" target-dir="res/layout"/>
-
     <source-file src="src/android/libs/agora-rtc-sdk.jar" target-dir="libs"/>
+
     <source-file src="src/android/libs/armeabi-v7a/libagora-rtc-sdk-jni.so" target-dir="libs/armeabi-v7a"
                  framework="true"/>
-    <source-file src="src/android/libs/x86/libagora-rtc-sdk-jni.so" target-dir="libs/x86" framework="true"/>
-    <source-file src="src/android/libs/armeabi-v7a/libHDACEngine.so" target-dir="libs/armeabi-v7a" framework="true"/>
-    <source-file src="src/android/libs/x86/libHDACEngine.so" target-dir="libs/x86" framework="true"/>
+
+    <source-file src="src/android/libs/armeabi-v7a/libHDACEngine.so" target-dir="libs/armeabi-v7a"
+                 framework="true"/>
+                 
+    <source-file src="src/android/res/drawable-hdpi/icon_go_back.png" target-dir="res/drawable-hdpi" framework="true"/>
+
+    <source-file src="src/android/res/drawable-hdpi/icon_switch_camera.png" target-dir="res/drawable-hdpi" framework="true"/>
+
+    <source-file src="src/android/layout/video.xml" target-dir="res/layout"/>
+
   </platform>
 
 </plugin>
