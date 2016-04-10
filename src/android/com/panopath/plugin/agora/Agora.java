@@ -57,7 +57,7 @@ public class Agora extends CordovaPlugin {
                 return false;
             }
             final String channel = args.getString(0);
-            final String extraInfo = args.getString(1);
+            final String optionalUID = args.getString(1);
 
             Log.d(TAG, "Joining Channel " + channel);
 
@@ -67,7 +67,7 @@ public class Agora extends CordovaPlugin {
                     Intent myIntent = new Intent(appActivity, VideoActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putString("channel", channel);
-                    bundle.putString("extraInfo", extraInfo);
+                    bundle.putInt("optionalUID", Integer.parseInt(optionalUID));
                     myIntent.putExtras(bundle);
                     appActivity.startActivity(myIntent);
                 }

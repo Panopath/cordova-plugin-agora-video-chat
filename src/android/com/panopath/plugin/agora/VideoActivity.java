@@ -159,11 +159,10 @@ public class VideoActivity extends BaseEngineEventHandlerActivity {
 
         mRtcEngine.joinChannel(RtcEngineCreator.getInstance().getVendorKey(),
                 bundle.getString("channel"),
-                bundle.getString("extraInfo"),
-                0
+                "",
+                bundle.getInt("optionalUID")
         );
 
         Log.i(Agora.TAG, "calling join channel");
-
     }
 }

@@ -38,13 +38,16 @@ module.exports = {
         self.logAllEvents = false;
     },
 
-    joinChannel: function (channel, extraInfo, successCallback, failCallback) {
+    joinChannel: function (channel, optionalUID, successCallback, failCallback) {
+        if (!optionalUID)
+            optionalUID = 0;
+
         if (!self.vendorKey) {
             if (typeof failCallback == 'function') {
                 failCallback('call setKey() first!');
             }
         }
-        cordova.exec(successCallback, failCallback, 'Agora', 'joinChannel', [channel, extraInfo]);
+        cordova.exec(successCallback, failCallback, 'Agora', 'joinChannel', [channel, optionalUID]);
     },
 
     leaveChannel: function () {
