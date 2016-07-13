@@ -66,7 +66,6 @@ Specifically, there are
 |onFirstRemoteVideoFrame|int uid, int width, int height, int elapsed|
 |onFirstLocalVideoFrame|int width, int height, int elapsed|
 |onConnectionInterrupted|无|
-|onMediaEngineEvent|int code|
 |onConnectionLost|无|
 |onError|int err|
 |onFirstRemoteVideoDecoded|int uid, int width, int height, int elapsed|

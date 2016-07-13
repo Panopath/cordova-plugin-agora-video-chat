@@ -363,27 +363,6 @@ public class MessageHandler extends IRtcEngineEventHandler {
     }
 
     @Override
-    public void onMediaEngineEvent(int code) {
-        JSONStringer jsonText = new JSONStringer();
-
-        try {
-            jsonText.object();
-            jsonText.key("code");
-            jsonText.value(code);
-            jsonText.endObject();
-        } catch (JSONException ignored) {
-        }
-
-        Agora.notifyEvent("onMediaEngineEvent", jsonText.toString());
-
-        BaseEngineEventHandlerActivity activity = getActivity();
-
-        if (activity != null) {
-            activity.onMediaEngineEvent(code);
-        }
-    }
-
-    @Override
     public void onConnectionLost() {
         JSONStringer jsonText = new JSONStringer();
 
