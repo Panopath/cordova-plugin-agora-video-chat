@@ -5,17 +5,19 @@
 //  Created by apple on 15/9/9.
 //  Copyright (c) 2015年 Agora. All rights reserved.
 //
-
+#import "agora.h"
 #import "AGDChatViewController.h"
 
 @interface AGDChatViewController ()
 {
     __block AgoraRtcStats *lastStat_;
+    void (^_completionHandler)(NSString* someParameter);
 }
 
 @property (strong, nonatomic) IBOutletCollection(UIButton) NSArray *speakerControlButtons;
 @property (strong, nonatomic) IBOutletCollection(UIButton) NSArray *audioMuteControlButtons;
 @property (weak, nonatomic) IBOutlet UIButton *cameraControlButton;
+@property (weak, nonatomic) IBOutlet UIView *videoSelfView;
 
 @property (weak, nonatomic) IBOutlet UIView *audioControlView;
 @property (weak, nonatomic) IBOutlet UIView *videoControlView;
@@ -38,6 +40,8 @@
 
 //
 @property (assign, nonatomic) AGDChatType type;
+@property (strong, nonatomic) IBOutlet UIView *selfView;
+@property (strong, nonatomic) IBOutlet UIView *RemoteView;
 @property (strong, nonatomic) NSString *channel;
 @property (strong, nonatomic) NSString *vendorKey;
 @property (assign, nonatomic) BOOL agoraVideoEnabled;
@@ -45,6 +49,8 @@
 @property (nonatomic) NSUInteger duration;
 
 @property (strong, nonatomic) UIAlertView *errorKeyAlert;
+@property (assign, nonatomic) BOOL is_lecture_mode;
+@property (assign, nonatomic) int selfUid;
 
 @end
 
@@ -53,20 +59,40 @@
     self = [super initWithCoder:aDecoder];
     return self;
 }
+-(void) setKey:(NSString *)key
+{
+    self.vendorKey = key;
+}
+
+-(void)setChn:(NSString *)channel
+{
+    self.channel = channel;
+}
+
+-(void) setCallback:(void (^)(NSString *))handler
+{
+    _completionHandler = [handler copy];
+}
+
+-(void) setLecture: (BOOL) is_lecture
+{
+    _is_lecture_mode = is_lecture;
+}
+-(void) setUid: (int) uid
+{
+    _selfUid=uid;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
     //
     self.uids = [NSMutableArray array];
     self.videoMuteForUids = [NSMutableDictionary dictionary];
-
-    self.channel = @"1";
-    self.vendorKey = @"7358d38eb1714f7c9d8cc937fcdc4c73";
     self.type = AGDChatTypeVideo;
-
+    
     self.title = [NSString stringWithFormat:@"%@ %@",NSLocalizedString(@"room", nil), self.channel];
-//    [self selectSpeakerButtons:YES];
+    //    [self selectSpeakerButtons:YES];
     [self initAgoraKit];
     NSLog(@"self: %@", self);
 }
@@ -74,7 +100,8 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    self.videoMainView.frame = self.videoMainView.superview.bounds; // video view's autolayout cause crash
+    if(_is_lecture_mode) self.videoSelfView.frame = self.videoSelfView.superview.bounds; // video view's autolayout cause crash
+    else if(_selfUid==10000) self.videoMainView.frame = self.videoMainView.superview.bounds;
     [self joinChannel];
 }
 
@@ -90,32 +117,26 @@
 {
     // use test key
     self.agoraKit = [AgoraRtcEngineKit sharedEngineWithVendorKey:self.vendorKey delegate:self];
-
-//    self.agoraKit = [[AgoraRtcEngineKit alloc] initWithVendorKey:self.vendorKey error:^(AgoraRtcErrorCode errorCode) {
-//        if (errorCode == AgoraRtc_Error_InvalidVendorKey) {
-//            [self.agoraKit leaveChannel:nil];
-//            [self.errorKeyAlert show];
-//        }
-//    }];
+    
     [self.agoraKit setLogFilter:0];
-
+    
     [self setUpVideo];
     [self setUpBlocks];
 }
 
 - (void)joinChannel
 {
-    [self showAlertLabelWithString:NSLocalizedString(@"wait_attendees", nil)];
+    if(!_is_lecture_mode)[self showAlertLabelWithString:NSLocalizedString(@"Waiting for attendees", nil)];
+    else if(_selfUid!=10000) [self showAlertLabelWithString:NSLocalizedString(@"Waiting for lecturer", nil)];
     __weak __typeof(self) weakSelf = self;
-    [self.agoraKit joinChannelByKey:nil channelName:self.channel info:nil uid:0 joinSuccess:^(NSString *channel, NSUInteger uid, NSInteger elapsed) {
-
+    [self.agoraKit joinChannelByKey:nil channelName:self.channel info:nil uid:_selfUid joinSuccess:^(NSString *channel, NSUInteger uid, NSInteger elapsed) {
+        
         [weakSelf.agoraKit setEnableSpeakerphone:YES];
         if (weakSelf.type == AGDChatTypeAudio) {
             [weakSelf.agoraKit disableVideo];
         }
-
         [UIApplication sharedApplication].idleTimerDisabled = YES;
-
+        
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
         [userDefaults setObject:weakSelf.vendorKey forKey:AGDKeyVendorKey];
     }];
@@ -123,19 +144,34 @@
 
 - (void)setUpVideo
 {
+    __weak __typeof(self) weakSelf = self;
     [self.agoraKit enableVideo];
-    AgoraRtcVideoCanvas *videoCanvas = [[AgoraRtcVideoCanvas alloc] init];
-    videoCanvas.uid = 0;
-    videoCanvas.view = self.videoMainView;
-    videoCanvas.renderMode = AgoraRtc_Render_Hidden;
-    [self.agoraKit setupLocalVideo:videoCanvas];
+    if(!_is_lecture_mode) {
+        AgoraRtcVideoCanvas *videoCanvas = [[AgoraRtcVideoCanvas alloc] init];
+        videoCanvas.uid = 0;
+        videoCanvas.view = self.videoSelfView;
+        videoCanvas.renderMode = AgoraRtc_Render_Hidden;
+        weakSelf.videoSelfView.frame = weakSelf.videoSelfView.superview.bounds;
+        if([self.agoraKit setupLocalVideo:videoCanvas]<0) NSLog(@"failed local view");
+    } else {
+        if(_selfUid == 10000) {
+            AgoraRtcVideoCanvas *videoCanvas = [[AgoraRtcVideoCanvas alloc] init];
+            videoCanvas.uid = 10000;
+            videoCanvas.view = self.videoMainView;
+            videoCanvas.renderMode = AgoraRtc_Render_Hidden;
+            //            weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
+            if([self.agoraKit setupLocalVideo:videoCanvas]<0) NSLog(@"failed local view");
+        }
+    }
 }
 
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine firstLocalVideoFrameWithSize:(CGSize)size elapsed:(NSInteger)elapsed
 {
     NSLog(@"local video display");
     __weak __typeof(self) weakSelf = self;
-    weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds; // video view's autolayout cause crash
+    if(!_is_lecture_mode) weakSelf.videoSelfView.frame = weakSelf.videoSelfView.superview.bounds;
+    else if(_selfUid == 10000)weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
+    //weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
 }
 
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine didJoinedOfUid:(NSUInteger)uid elapsed:(NSInteger)elapsed
@@ -143,19 +179,37 @@
     __weak __typeof(self) weakSelf = self;
     NSLog(@"self: %@", weakSelf);
     NSLog(@"engine: %@", engine);
-    [weakSelf hideAlertLabel];
-    [weakSelf.uids addObject:@(uid)];
-
-    [weakSelf.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:weakSelf.uids.count-1 inSection:0]]];
+    //    [weakSelf hideAlertLabel];
+    //    [weakSelf.uids addObject:@(uid)];
+    //
+    //    [weakSelf.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:weakSelf.uids.count-1 inSection:0]]];
+    if(!_is_lecture_mode || (_selfUid != 10000 && uid == 10000)) {
+        AgoraRtcVideoCanvas *videoCanvas = [[AgoraRtcVideoCanvas alloc] init];
+        videoCanvas.uid = uid;
+        videoCanvas.view = self.videoMainView;
+        videoCanvas.renderMode = AgoraRtc_Render_Hidden;
+        weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
+        if([self.agoraKit setupRemoteVideo:videoCanvas]<0) NSLog(@"fail");
+    }
 }
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine didOfflineOfUid:(NSUInteger)uid reason:(AgoraRtcUserOfflineReason)reason
 {
     __weak __typeof(self) weakSelf = self;
-    NSInteger index = [weakSelf.uids indexOfObject:@(uid)];
-    if (index != NSNotFound) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-        [weakSelf.uids removeObjectAtIndex:index];
-        [weakSelf.collectionView deleteItemsAtIndexPaths:@[indexPath]];
+    //    NSInteger index = [weakSelf.uids indexOfObject:@(uid)];
+    //    if (index != NSNotFound) {
+    //        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+    //        [weakSelf.uids removeObjectAtIndex:index];
+    //        [weakSelf.collectionView deleteItemsAtIndexPaths:@[indexPath]];
+    //    }
+    if(!_is_lecture_mode) {
+        [self showAlertLabelWithString:NSLocalizedString(@"Waiting for attendee", nil)];
+        weakSelf.videoMainView.hidden = true;
+    }
+    else {
+        if(uid == 10000 && _selfUid != 10000) {
+           [self showAlertLabelWithString:NSLocalizedString(@"Waiting for lecturer", nil)];
+            weakSelf.videoMainView.hidden = true;
+        }
     }
 }
 
@@ -163,7 +217,7 @@
 {
     __weak __typeof(self) weakSelf = self;
     NSLog(@"user %@ mute video: %@", @(uid), muted ? @"YES" : @"NO");
-
+    
     [weakSelf.videoMuteForUids setObject:@(muted) forKey:@(uid)];
     [weakSelf.collectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:[weakSelf.uids indexOfObject:@(uid)] inSection:0]]];
 }
@@ -172,7 +226,7 @@
 {
     __weak __typeof(self) weakSelf = self;
     [weakSelf showAlertLabelWithString:NSLocalizedString(@"no_network", nil)];
-    weakSelf.videoMainView.hidden = YES;
+    weakSelf.videoSelfView.hidden = YES;
     weakSelf.dataTrafficLabel.text = @"0KB/s";
 }
 
@@ -184,12 +238,12 @@
         weakSelf.talkTimeLabel.text = @"00:00";
         weakSelf.durationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:weakSelf selector:@selector(updateTalkTimeLabel) userInfo:nil repeats:YES];
     }
-
+    
     NSUInteger traffic = (stats.txBytes + stats.rxBytes - lastStat_.txBytes - lastStat_.rxBytes) / 1024;
     NSUInteger speed = traffic / (stats.duration - lastStat_.duration);
     NSString *trafficString = [NSString stringWithFormat:@"%@KB/s", @(speed)];
     weakSelf.dataTrafficLabel.text = trafficString;
-
+    
     lastStat_ = stats;
 }
 
@@ -204,56 +258,56 @@
 
 - (void)setUpBlocks
 {
-//    [self.agoraKit rtcStatsBlock:^(AgoraRtcStats *stat) {
-//        // Update talk time
-//        if (self.duration == 0 && !self.durationTimer) {
-//            self.talkTimeLabel.text = @"00:00";
-//            self.durationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateTalkTimeLabel) userInfo:nil repeats:YES];
-//        }
-//
-//        NSUInteger traffic = (stat.txBytes + stat.rxBytes - lastStat_.txBytes - lastStat_.rxBytes) / 1024;
-//        NSUInteger speed = traffic / (stat.duration - lastStat_.duration);
-//        NSString *trafficString = [NSString stringWithFormat:@"%@KB/s", @(speed)];
-//        self.dataTrafficLabel.text = trafficString;
-//
-//        lastStat_ = stat;
-//    }];
-
-//    [self.agoraKit userJoinedBlock:^(NSUInteger uid, NSInteger elapsed) {
-//        [self hideAlertLabel];
-//        [self.uids addObject:@(uid)];
-//
-//        [self.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:self.uids.count-1 inSection:0]]];
-//    }];
-
-//    [self.agoraKit userOfflineBlock:^(NSUInteger uid) {
-//        NSInteger index = [self.uids indexOfObject:@(uid)];
-//        if (index != NSNotFound) {
-//            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-//            [self.uids removeObjectAtIndex:index];
-//            [self.collectionView deleteItemsAtIndexPaths:@[indexPath]];
-//        }
-//    }];
-
-
-
-//    [self.agoraKit connectionLostBlock:^{
-//        [self showAlertLabelWithString:NSLocalizedString(@"no_network", nil)];
-//        self.videoMainView.hidden = YES;
-//        self.dataTrafficLabel.text = @"0KB/s";
-//    }];
-
-//    [self.agoraKit userMuteVideoBlock:^(NSUInteger uid, BOOL muted) {
-//        NSLog(@"user %@ mute video: %@", @(uid), muted ? @"YES" : @"NO");
-//
-//        [self.videoMuteForUids setObject:@(muted) forKey:@(uid)];
-//        [self.collectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:[self.uids indexOfObject:@(uid)] inSection:0]]];
-//    }];
-//
-//    [self.agoraKit firstLocalVideoFrameBlock:^(NSInteger width, NSInteger height, NSInteger elapsed) {
-//        NSLog(@"local video display");
-//        self.videoMainView.frame = self.videoMainView.superview.bounds; // video view's autolayout cause crash
-//    }];
+    //    [self.agoraKit rtcStatsBlock:^(AgoraRtcStats *stat) {
+    //        // Update talk time
+    //        if (self.duration == 0 && !self.durationTimer) {
+    //            self.talkTimeLabel.text = @"00:00";
+    //            self.durationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateTalkTimeLabel) userInfo:nil repeats:YES];
+    //        }
+    //
+    //        NSUInteger traffic = (stat.txBytes + stat.rxBytes - lastStat_.txBytes - lastStat_.rxBytes) / 1024;
+    //        NSUInteger speed = traffic / (stat.duration - lastStat_.duration);
+    //        NSString *trafficString = [NSString stringWithFormat:@"%@KB/s", @(speed)];
+    //        self.dataTrafficLabel.text = trafficString;
+    //
+    //        lastStat_ = stat;
+    //    }];
+    
+    //    [self.agoraKit userJoinedBlock:^(NSUInteger uid, NSInteger elapsed) {
+    //        [self hideAlertLabel];
+    //        [self.uids addObject:@(uid)];
+    //
+    //        [self.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:self.uids.count-1 inSection:0]]];
+    //    }];
+    
+    //    [self.agoraKit userOfflineBlock:^(NSUInteger uid) {
+    //        NSInteger index = [self.uids indexOfObject:@(uid)];
+    //        if (index != NSNotFound) {
+    //            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+    //            [self.uids removeObjectAtIndex:index];
+    //            [self.collectionView deleteItemsAtIndexPaths:@[indexPath]];
+    //        }
+    //    }];
+    
+    
+    
+    //    [self.agoraKit connectionLostBlock:^{
+    //        [self showAlertLabelWithString:NSLocalizedString(@"no_network", nil)];
+    //        self.videoMainView.hidden = YES;
+    //        self.dataTrafficLabel.text = @"0KB/s";
+    //    }];
+    
+    //    [self.agoraKit userMuteVideoBlock:^(NSUInteger uid, BOOL muted) {
+    //        NSLog(@"user %@ mute video: %@", @(uid), muted ? @"YES" : @"NO");
+    //
+    //        [self.videoMuteForUids setObject:@(muted) forKey:@(uid)];
+    //        [self.collectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:[self.uids indexOfObject:@(uid)] inSection:0]]];
+    //    }];
+    //
+    //    [self.agoraKit firstLocalVideoFrameBlock:^(NSInteger width, NSInteger height, NSInteger elapsed) {
+    //        NSLog(@"local video display");
+    //        self.videoMainView.frame = self.videoMainView.superview.bounds; // video view's autolayout cause crash
+    //    }];
 }
 
 #pragma mark -
@@ -307,12 +361,12 @@
 {
     btn.selected = !btn.selected;
     [self.agoraKit muteLocalVideoStream:btn.selected];
-    self.videoMainView.hidden = btn.selected;
+    self.videoSelfView.hidden = btn.selected;
 }
 
 - (IBAction)didClickSwitchButton:(UIButton *)btn
 {
-    btn.selected = !btn.selected;
+//    btn.selected = !btn.selected;
     [self.agoraKit switchCamera];
 }
 
@@ -326,6 +380,7 @@
         [weakSelf.navigationController popViewControllerAnimated:YES];
         [UIApplication sharedApplication].idleTimerDisabled = NO;
     }];
+    _completionHandler(@"hi");
     [self dismissViewControllerAnimated:true completion:Nil];
 }
 
@@ -357,11 +412,11 @@
 {
     AGDChatCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"CollectionViewCell" forIndexPath:indexPath];
     cell.type = self.type;
-
+    
     // Get info
     NSNumber *uid = [self.uids objectAtIndex:indexPath.row];
     NSNumber *videoMute = [self.videoMuteForUids objectForKey:uid];
-
+    
     if (self.type == AGDChatTypeVideo) {
         if (videoMute.boolValue) {
             cell.type = AGDChatTypeAudio;
@@ -376,7 +431,7 @@
     } else {
         cell.type = AGDChatTypeAudio;
     }
-
+    
     // Audio
     cell.nameLabel.text = uid.stringValue;
     return cell;
@@ -391,22 +446,22 @@
         // Control buttons
         self.videoControlView.hidden = NO;
         self.audioControlView.hidden = YES;
-
+        
         // Video/Audio switch button
         self.videoButton.selected = YES;
         self.audioButton.selected = NO;
-
+        
         //
         self.videoMainView.hidden = NO;
     } else {
         // Control buttons
         self.videoControlView.hidden = YES;
         self.audioControlView.hidden = NO;
-
+        
         // Video/Audio switch button
         self.videoButton.selected = NO;
         self.audioButton.selected = YES;
-
+        
         //
         self.videoMainView.hidden = YES;
     }

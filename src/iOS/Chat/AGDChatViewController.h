@@ -11,7 +11,11 @@
 #import <AgoraRtcEngineKit/AgoraRtcEngineKit.h>
 
 @interface AGDChatViewController : UIViewController <UICollectionViewDataSource, UICollectionViewDelegate, AgoraRtcEngineDelegate>
-
+-(void) setKey: (NSString*) key;
+-(void) setChn: (NSString*) channel;
+-(void) setCallback: (void(^)(NSString*))handler;
+-(void) setLecture: (BOOL) is_lecture;
+-(void) setUid: (int) uid;
 @property(nonatomic,retain) NSDictionary *dictionary;
 
 @property (assign, nonatomic) AGDChatType chatType;

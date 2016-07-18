@@ -19,17 +19,19 @@ typedef NSView VIEW_CLASS;
 #endif
 
 typedef NS_ENUM(NSInteger, AgoraRtcWarningCode) {
+    AgoraRtc_Warn_Pending = 20,
     AgoraRtc_Warn_NoAvailableChannel = 103,
     AgoraRtc_Warn_LookupChannelTimeout = 104,
     AgoraRtc_Warn_LookupChannelRejected = 105,
     AgoraRtc_Warn_OpenChannelTimeout = 106,
     AgoraRtc_Warn_OpenChannelRejected = 107,
-    AgoraRtc_Warn_RequestDeferred = 108,
     AgoraRtc_Warn_Adm_RuntimePlayoutWarning = 1014,
     AgoraRtc_Warn_Adm_RuntimeRecordingWarning = 1016,
     AgoraRtc_Warn_Adm_RecordAudioSilence = 1019,
-    AgoraRtc_Warn_Adm_PlaybackAbnormalFrequency = 1020,
-    AgoraRtc_Warn_Adm_RecordAbnormalFrequency = 1021,
+    AgoraRtc_Warn_Adm_PlaybackMalfunction = 1020,
+    AgoraRtc_Warn_Adm_RecordMalfunction = 1021,
+    AgoraRtc_Warn_Adm_Interruption = 1025,
+    AgoraRtc_Warn_Adm_RouteChange = 1026,
     AgoraRtc_Warn_Apm_Howling = 1051,
 };
 
@@ -41,9 +43,9 @@ typedef NS_ENUM(NSInteger, AgoraRtcErrorCode) {
     AgoraRtc_Error_NotSupported = 4,
     AgoraRtc_Error_Refused = 5,
     AgoraRtc_Error_BufferTooSmall = 6,
-	AgoraRtc_Error_NotInitialized = 7,
-	AgoraRtc_Error_InvalidView = 8,
-	AgoraRtc_Error_NoPermission = 9,
+    AgoraRtc_Error_NotInitialized = 7,
+    AgoraRtc_Error_InvalidView = 8,
+    AgoraRtc_Error_NoPermission = 9,
     AgoraRtc_Error_TimedOut = 10,
     AgoraRtc_Error_Canceled = 11,
     AgoraRtc_Error_TooOften = 12,
@@ -53,66 +55,78 @@ typedef NS_ENUM(NSInteger, AgoraRtcErrorCode) {
     AgoraRtc_Error_InitVideo = 16,
     AgoraRtc_Error_JoinChannelRejected = 17,
     AgoraRtc_Error_LeaveChannelRejected = 18,
+    AgoraRtc_Error_AlreadyInUse = 19,
 
     AgoraRtc_Error_InvalidVendorKey = 101,
     AgoraRtc_Error_InvalidChannelName = 102,
     AgoraRtc_Error_DynamicKeyTimeout = 109,
+    AgoraRtc_Error_InvalidDynamicKey = 110,
     
     AgoraRtc_Error_LoadMediaEngine = 1001,
     AgoraRtc_Error_StartCall = 1002,
     AgoraRtc_Error_StartCamera = 1003,
-	AgoraRtc_Error_StartVideoRender = 1004,
-	AgoraRtc_Error_Adm_GeneralError = 1005,
-	AgoraRtc_Error_Adm_JavaResource = 1006,
-	AgoraRtc_Error_Adm_SampleRate = 1007,
-	AgoraRtc_Error_Adm_InitPlayout = 1008,
-	AgoraRtc_Error_Adm_StartPlayout = 1009,
-	AgoraRtc_Error_Adm_StopPlayout = 1010,
-	AgoraRtc_Error_Adm_InitRecording = 1011,
-	AgoraRtc_Error_Adm_StartRecording = 1012,
-	AgoraRtc_Error_Adm_StopRecording = 1013,
+    AgoraRtc_Error_StartVideoRender = 1004,
+    AgoraRtc_Error_Adm_GeneralError = 1005,
+    AgoraRtc_Error_Adm_JavaResource = 1006,
+    AgoraRtc_Error_Adm_SampleRate = 1007,
+    AgoraRtc_Error_Adm_InitPlayout = 1008,
+    AgoraRtc_Error_Adm_StartPlayout = 1009,
+    AgoraRtc_Error_Adm_StopPlayout = 1010,
+    AgoraRtc_Error_Adm_InitRecording = 1011,
+    AgoraRtc_Error_Adm_StartRecording = 1012,
+    AgoraRtc_Error_Adm_StopRecording = 1013,
     AgoraRtc_Error_Adm_RuntimePlayoutError = 1015,
     AgoraRtc_Error_Adm_RuntimeRecordingError = 1017,
     AgoraRtc_Error_Adm_RecordAudioFailed = 1018,
-    AgoraRtc_Error_Adm_Record_Audio_Silent = 1019,
     AgoraRtc_Error_Adm_Play_Abnormal_Frequency = 1020,
     AgoraRtc_Error_Adm_Record_Abnormal_Frequency = 1021,
     AgoraRtc_Error_Adm_Init_Loopback  = 1022,
     AgoraRtc_Error_Adm_Start_Loopback = 1023,
     AgoraRtc_Error_Vdm_Camera_Not_Authorized = 1024,
+    // 1025, as warning for interruption of adm on ios
+    // 1026, as warning for route change of adm on ios
 };
 
 typedef NS_ENUM(NSInteger, AgoraRtcChannelProfile) {
 	AgoraRtc_ChannelProfile_Free = 0,
 	AgoraRtc_ChannelProfile_Broadcaster = 1,
 	AgoraRtc_ChannelProfile_Audience = 2,
-	AgoraRtc_ChannelProfile_WebSdkCompatible = 3,
 };
 
 typedef NS_ENUM(NSInteger, AgoraRtcVideoProfile) {
                                             // res       fps  kbps
+    AgoraRtc_VideoProfile_Invalid = -1,
     AgoraRtc_VideoProfile_120P = 0,         // 160x120   15   80
     AgoraRtc_VideoProfile_120P_2 = 1,		// 120x160   15   80
-    AgoraRtc_VideoProfile_120P_3 = 2,		// 120x120   15   60
+#if TARGET_OS_IPHONE
+	AgoraRtc_VideoProfile_120P_3 = 2,		// 120x120   15   60
     AgoraRtc_VideoProfile_180P = 10,		// 320x180   15   160
     AgoraRtc_VideoProfile_180P_2 = 11,		// 180x320   15   160
-    AgoraRtc_VideoProfile_180P_3 = 12,		// 180x180   15   120
+	AgoraRtc_VideoProfile_180P_3 = 12,		// 180x180   15   120
+#endif
     AgoraRtc_VideoProfile_240P = 20,		// 320x240   15   200
     AgoraRtc_VideoProfile_240P_2 = 21,		// 240x320   15   200
-    AgoraRtc_VideoProfile_240P_3 = 22,		// 240x240   15   160
+#if TARGET_OS_IPHONE
+	AgoraRtc_VideoProfile_240P_3 = 22,		// 240x240   15   160
+#endif
     AgoraRtc_VideoProfile_360P = 30,		// 640x360   15   400
     AgoraRtc_VideoProfile_360P_2 = 31,		// 360x640   15   400
-    AgoraRtc_VideoProfile_360P_3 = 32,		// 360x360   15   300
+#if TARGET_OS_IPHONE
+	AgoraRtc_VideoProfile_360P_3 = 32,		// 360x360   15   300
+#endif
     AgoraRtc_VideoProfile_360P_4 = 33,		// 640x360   30   680
     AgoraRtc_VideoProfile_360P_5 = 34,		// 360x640   30   680
     AgoraRtc_VideoProfile_360P_6 = 35,		// 360x360   30   500
     AgoraRtc_VideoProfile_480P = 40,		// 640x480   15   500
     AgoraRtc_VideoProfile_480P_2 = 41,		// 480x640   15   500
-    AgoraRtc_VideoProfile_480P_3 = 42,		// 480x480   15   400
+#if TARGET_OS_IPHONE
+	AgoraRtc_VideoProfile_480P_3 = 42,		// 480x480   15   400
+#endif
     AgoraRtc_VideoProfile_480P_4 = 43,		// 640x480   30   750
     AgoraRtc_VideoProfile_480P_5 = 44,		// 480x640   30   750
     AgoraRtc_VideoProfile_480P_6 = 45,		// 480x480   30   680
-    AgoraRtc_VideoProfile_720P = 50,		// 1280x720  15   1000
+    AgoraRtc_VideoProfile_480P_7 = 46,		// 640x480 15 1000
+   AgoraRtc_VideoProfile_720P = 50,		// 1280x720  15   1000
     AgoraRtc_VideoProfile_720P_2 = 51,		// 720x1280  15   1000
     AgoraRtc_VideoProfile_720P_3 = 52,		// 1280x720  30   1700
     AgoraRtc_VideoProfile_720P_4 = 53,		// 720x1280  30   1700
@@ -127,6 +141,7 @@ typedef NS_ENUM(NSInteger, AgoraRtcVideoProfile) {
     AgoraRtc_VideoProfile_4K_3 = 72,		// 3840x2160 60   13600
     AgoraRtc_VideoProfile_4K_4 = 73,		// 2160x3840 60   13600
     AgoraRtc_VideoProfile_DEFAULT = AgoraRtc_VideoProfile_360P,
+    AgoraRtc_VideoProfile_480P_HIGH = 100,		// 480x480   30   680
 };
 
 typedef NS_ENUM(NSUInteger, AgoraRtcQuality) {
@@ -145,6 +160,7 @@ typedef NS_ENUM(NSUInteger, AgoraRtcUserOfflineReason) {
 };
 
 typedef NS_ENUM(NSUInteger, AgoraRtcLogFilter) {
+    AgoraRtc_LogFilter_Console = 0x08000,
     AgoraRtc_LogFilter_Debug = 0x0800,
     AgoraRtc_LogFilter_Info = 0x0001,
     AgoraRtc_LogFilter_Warn = 0x0002,
@@ -175,6 +191,28 @@ typedef NS_ENUM(NSUInteger, AgoraRtcQualityReportFormat) {
     AgoraRtc_QualityReportFormat_Html = 1,
 };
 
+
+#if (!(TARGET_OS_IPHONE) && (TARGET_OS_MAC))
+
+typedef NS_ENUM(NSInteger, AgoraRtcDeviceType) {
+    AgoraRtc_DeviceType_Audio_Unknown = -1,
+    AgoraRtc_DeviceType_Audio_Recording = 0,
+    AgoraRtc_DeviceType_Audio_Playout = 1,
+    AgoraRtc_DeviceType_Video_Render = 2,
+    AgoraRtc_DeviceType_Video_Capture = 3,
+};
+
+__attribute__((visibility("default"))) @interface AgoraRtcDeviceInfo : NSObject
+
+@property (assign, nonatomic) int index;
+@property (assign, nonatomic) AgoraRtcDeviceType type; // 0: recording, 1: playback, 2: capture
+@property (copy, nonatomic) NSString* deviceId; //
+@property (copy, nonatomic) NSString* deviceName; //
+@end
+
+#endif
+
+
 __attribute__((visibility("default"))) @interface AgoraRtcVideoCanvas : NSObject
 
 /**
@@ -192,6 +230,21 @@ __attribute__((visibility("default"))) @interface AgoraRtcStats : NSObject
 @property (assign, nonatomic) NSUInteger duration;
 @property (assign, nonatomic) NSUInteger txBytes;
 @property (assign, nonatomic) NSUInteger rxBytes;
+@property(assign, nonatomic) NSUInteger users;
+@end
+
+__attribute__((visibility("default"))) @interface AgoraRtcLocalVideoStats : NSObject
+@property (assign, nonatomic) NSUInteger sentBitrate;
+@property (assign, nonatomic) NSUInteger sentFrameRate;
+@end
+
+__attribute__((visibility("default"))) @interface AgoraRtcRemoteVideoStats : NSObject
+@property (assign, nonatomic) NSUInteger uid;
+@property (assign, nonatomic) NSUInteger delay;
+@property (assign, nonatomic) NSUInteger width;
+@property (assign, nonatomic) NSUInteger height;
+@property (assign, nonatomic) NSUInteger receivedBitrate;
+@property (assign, nonatomic) NSUInteger receivedFrameRate;
 @end
 
 __attribute__((visibility("default"))) @interface AgoraRtcAudioVolumeInfo : NSObject
@@ -294,13 +347,23 @@ __attribute__((visibility("default"))) @interface AgoraRtcAudioVolumeInfo : NSOb
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine didVideoMuted:(BOOL)muted byUid:(NSUInteger)uid;
 
 /**
+ *  Event of remote user video muted or unmuted
+ *
+ *  @param engine The engine kit
+ *  @param muted  Muted or unmuted
+ *  @param uid    The remote user id
+ */
+- (void)rtcEngine:(AgoraRtcEngineKit *)engine didVideoEnabled:(BOOL)enabled byUid:(NSUInteger)uid;
+
+/**
  *  The statistics of local video stream. Update every two seconds.
  *
  *  @param engine        The engine kit
  *  @param sentBitrate   The sent bit rate
  *  @param sentFrameRate The sent video frame rate
  */
-- (void)rtcEngine:(AgoraRtcEngineKit *)engine localVideoStatWithSentBitrate:(NSInteger)sentBitrate sentFrameRate:(NSInteger)sentFrameRate;
+- (void)rtcEngine:(AgoraRtcEngineKit *)engine localVideoStatWithSentBitrate:(NSInteger)sentBitrate sentFrameRate:(NSInteger)sentFrameRate __deprecated;
+- (void)rtcEngine:(AgoraRtcEngineKit *)engine localVideoStats:(AgoraRtcLocalVideoStats*)stats;
 
 /**
  *  The statistics of remote video stream. Update every two seconds.
@@ -311,7 +374,8 @@ __attribute__((visibility("default"))) @interface AgoraRtcAudioVolumeInfo : NSOb
  *  @param receivedBitrate   The received bit rate
  *  @param receivedFrameRate The received frame rate
  */
-- (void)rtcEngine:(AgoraRtcEngineKit *)engine remoteVideoStatOfUid:(NSUInteger)uid delay:(NSInteger)delay receivedBitrate:(NSInteger)receivedBitrate receivedFrameRate:(NSInteger)receivedFrameRate;
+- (void)rtcEngine:(AgoraRtcEngineKit *)engine remoteVideoStatOfUid:(NSUInteger)uid delay:(NSInteger)delay receivedBitrate:(NSInteger)receivedBitrate receivedFrameRate:(NSInteger)receivedFrameRate __deprecated;
+- (void)rtcEngine:(AgoraRtcEngineKit *)engine remoteVideoStats:(AgoraRtcRemoteVideoStats*)stats;
 
 /**
  *  Event of camera opened
@@ -328,7 +392,16 @@ __attribute__((visibility("default"))) @interface AgoraRtcAudioVolumeInfo : NSOb
 - (void)rtcEngineVideoDidStop:(AgoraRtcEngineKit *)engine;
 
 /**
- *  Event of disconnected with server
+ *  Event of disconnected with server. This event is reported at the moment SDK loses connection with server.
+ *  In the mean time SDK automatically tries to reconnect with the server until APP calls leaveChannel.
+ *
+ *  @param engine The engine kit
+ */
+- (void)rtcEngineConnectionDidInterrupted:(AgoraRtcEngineKit *)engine;
+
+/**
+ *  Event of loss connection with server. This event is reported after the connection is interrupted and exceed the retry period (10 seconds by default).
+ *  In the mean time SDK automatically tries to reconnect with the server until APP calls leaveChannel.
  *
  *  @param engine The engine kit
  */
@@ -389,22 +462,17 @@ __attribute__((visibility("default"))) @interface AgoraRtcAudioVolumeInfo : NSOb
  */
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine networkQuality:(AgoraRtcQuality)quality;
 
+#if (!(TARGET_OS_IPHONE) && (TARGET_OS_MAC))
 /**
- * The event from media engine
+ *  the notificaitoin of device added removed
  *
  *  @param engine The engine kit
- *  @param event  The event of media engine
+ *  @param deviceId   the identification of device
+ *  @param deviceType type of device: -1: audio unknown; 0: audio recording ; 1: audio playout ; 2: render; 4: capture
+ *  @param state      state of device: 0: added; 1: removed
  */
-- (void)rtcEngine:(AgoraRtcEngineKit *)engine mediaEngineEvent:(NSInteger)event;
-
-/**
- *  receive custom data from remote user
- *
- *  @param engine The engine kit
- *  @param uid    The remote user id
- *  @param data   The user defined data
- */
-- (void)rtcEngine:(AgoraRtcEngineKit *)engine receiveVendorMessageFromUid:(NSUInteger)uid data:(NSData*)data;
+- (void)rtcEngine:(AgoraRtcEngineKit *)engine device:(NSString*) deviceId type:(AgoraRtcDeviceType) deviceType stateChanged:(NSInteger) state;
+#endif
 
 /**
  *  Event of API call executed
@@ -414,6 +482,8 @@ __attribute__((visibility("default"))) @interface AgoraRtcAudioVolumeInfo : NSOb
  *  @param error  The error code
  */
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine didApiCallExecute:(NSString*)api error:(NSInteger)error;
+
+- (void)rtcEngine:(AgoraRtcEngineKit *)engine didRefreshRecordingServiceStatus:(NSInteger)status;
 @end
 
 
@@ -452,6 +522,8 @@ __attribute__((visibility("default"))) @interface AgoraRtcEngineKit : NSObject
 + (instancetype)sharedEngineWithVendorKey:(NSString*)key
                   error:(void(^)(AgoraRtcErrorCode errorCode))errorBlock __deprecated;
 
++ (void)destroy;
+
 /**
  * deprecated blocks
  */
@@ -474,7 +546,6 @@ __attribute__((visibility("default"))) @interface AgoraRtcEngineKit : NSObject
 - (void)audioQualityBlock:(void(^)(NSUInteger uid, AgoraRtcQuality quality, NSUInteger delay, NSUInteger lost))audioQualityBlock __deprecated;
 - (void)networkQualityBlock:(void(^)(AgoraRtcQuality quality))networkQualityBlock __deprecated;
 - (void)mediaEngineEventBlock:(void(^)(NSInteger code))mediaEngineEventBlock __deprecated;
-- (void)vendorMessageBlock:(void(^)(NSUInteger uid, NSData* data))vendorMessageBlock __deprecated;
 
 
 /** BEGIN OF COMMON METHODS */
@@ -557,10 +628,6 @@ __attribute__((visibility("default"))) @interface AgoraRtcEngineKit : NSObject
  */
 - (int)stopPreview;
 
-- (int)enableVendorMessage;
-- (int)disableVendorMessage;
-- (int)sendVendorMessage:(NSData*)data;
-
 /**
  *  Specify sdk parameters
  *
@@ -568,22 +635,8 @@ __attribute__((visibility("default"))) @interface AgoraRtcEngineKit : NSObject
  */
 - (int)setParameters:(NSString *)options;
 
-/**
- *  Generates a URL linking to the call quality reports.
- *
- *  @param channel      The channel name specified in the joinChannel method.
- *  @param listenerUid  The uid of the listener.
- *  @param speakerUid   The uid of the speaker.
- *  @param reportFormat The format of the report.
-                        AgoraRtc_QualityReportFormat_Json (0): JSON.: Returns the quality report data in Json.
-                        AgoraRtc_QualityReportFormat_Html (1): HTML.: Returns a report in HTML format, displayed on a web browser or WebVIEW components.
- *
- *  @return 0 when executed successfully. return minus value when failed. return AgoraRtc_Error_Invalid_Argument (-2)：Invalid argument. return AgoraRtc_Error_Buffer_Too_Small (-6)：The buffer length is too small.
- */
-- (NSString*) makeQualityReportUrl:(NSString*) channel
-                       listenerUid:(NSUInteger) listenerUid
-                       speakerrUid:(NSUInteger) speakerUid
-                      reportFormat:(AgoraRtcQualityReportFormat) reportFormat;
+- (NSString*)getParameter:(NSString*)parameter
+                     args:(NSString*)args;
 
 /**
  *  The call id of current client. The call id could be used in 'rate' and 'complain' method.
@@ -681,6 +734,22 @@ __attribute__((visibility("default"))) @interface AgoraRtcEngineKit : NSObject
 
 
 /**
+ *  Start screen capture
+ *
+ *  @return 0 when executed successfully. return minus value if failed.
+ */
+- (int)startScreenCapture;
+
+
+/**
+ *  Stop screen capture
+ *
+ *  @return 0 when executed successfully. return minus value if failed.
+ */
+- (int)stopScreenCapture;
+
+
+/**
  *  Launches an echo test to test if the audio devices (e.g., headset and speaker) and the network connection work properly. In the test, the user speaks first, and the recording will be played back in 10 seconds. If the user can hear what he said in 10 seconds, it indicates that the audio devices and network connection work properly.
  Notes: Must call stopEchoTest to end the test, or won't start new test or join channel.
  *
@@ -766,6 +835,7 @@ __attribute__((visibility("default"))) @interface AgoraRtcEngineKit : NSObject
                       mode:(AgoraRtcRenderMode) mode;
 
 /**
+ *  API deprecated. Please refer to open source https://github.com/AgoraLab/AgoraDemo, the function "onSwitchRemoteUsers" in demo agora-easycall-ios-oc
  *   Switches between video display views of two different users.
  *
  *  @param uid1 The user ID of the user whose video is to be switched.
@@ -774,7 +844,7 @@ __attribute__((visibility("default"))) @interface AgoraRtcEngineKit : NSObject
  *  @return 0 when executed successfully. return minus value if failed.
  */
 - (int)switchView:(NSUInteger)uid1
-       andAnother:(NSUInteger)uid2;
+       andAnother:(NSUInteger)uid2 __deprecated;
 
 
 /**
@@ -862,5 +932,37 @@ __attribute__((visibility("default"))) @interface AgoraRtcEngineKit : NSObject
  *  @return 0 when executed successfully. return minus value if failed.
  */
 - (int)setChannelProfile:(AgoraRtcChannelProfile)profile;
+
+/**
+	* Specifying encryption secret enables built-in AES-128 encryption. Leaving channel will clear the secret specified in last channel
+	* @param [in] secret
+	*        secret to enable encryption
+	* @return return 0 if success or an error code
+	*/
+- (int)setEncryptionSecret:(NSString*)secret;
+
+- (int) startRecordingService:(NSString*)key;
+- (int) stopRecordingService:(NSString*)key;
+- (int) refreshRecordingServiceStatus;
+
+
+#if (!(TARGET_OS_IPHONE) && (TARGET_OS_MAC))
+
+- (NSArray*) enumerateDevices:(AgoraRtcDeviceType)type;  // return array of AgoraRtcDeviceInfo
+- (NSString*) getDeviceId:(AgoraRtcDeviceType)type;
+- (int) setDevice:(AgoraRtcDeviceType)type deviceId:(NSString *) deviceId;
+- (int) getDeviceVolume:(AgoraRtcDeviceType)type;
+- (int) setDeviceVolume:(AgoraRtcDeviceType)type volume:(int)volume;
+
+- (int) startRecordingDeviceTest:(int) indicationInterval;
+- (int) stopRecordingDeviceTest;
+
+- (int) startPlaybackDeviceTest:(NSString *) audioFileName;
+- (int) stopPlaybackDeviceTest;
+
+- (int) startCaptureDeviceTest:(NSView *) view;
+- (int) stopCaptureDeviceTest;
+#endif
+
 
 @end

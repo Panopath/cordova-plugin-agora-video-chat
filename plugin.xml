@@ -35,6 +35,7 @@
     <resource-file src="src/iOS/ChatView.storyboard" target-dir=""/>
     <resource-file src="src/iOS/Images.xcassets" target-dir=""/>
     <framework src="AudioToolbox.framework"></framework>
+    <framework src="VideoToolbox.framework"></framework>
     <framework src="AVFoundation.framework"></framework>
     <framework src="CoreMedia.framework"></framework>
     <framework src="CoreTelephony.framework"></framework>
@@ -43,7 +44,7 @@
     <framework src="libc++.dylib"></framework>
     <framework src="libz.dylib"></framework>
   </platform>
-
+  
   <!-- android -->
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
@@ -107,7 +108,5 @@
     <source-file src="src/android/res/drawable-hdpi/icon_switch_camera.png" target-dir="res/drawable-hdpi" framework="true"/>
 
     <source-file src="src/android/layout/video.xml" target-dir="res/layout"/>
-
   </platform>
-
 </plugin>
