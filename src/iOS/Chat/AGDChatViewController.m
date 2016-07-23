@@ -51,6 +51,7 @@
 @property (strong, nonatomic) UIAlertView *errorKeyAlert;
 @property (assign, nonatomic) BOOL is_lecture_mode;
 @property (assign, nonatomic) int selfUid;
+@property (assign, nonatomic) NSInteger listenerCounter;
 
 @end
 
@@ -100,8 +101,7 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if(_is_lecture_mode) self.videoSelfView.frame = self.videoSelfView.superview.bounds; // video view's autolayout cause crash
-    else if(_selfUid==10000) self.videoMainView.frame = self.videoMainView.superview.bounds;
+    self.videoSelfView.frame = self.videoSelfView.superview.bounds; // video view's autolayout cause crash
     [self joinChannel];
 }
 
@@ -118,16 +118,19 @@
     // use test key
     self.agoraKit = [AgoraRtcEngineKit sharedEngineWithVendorKey:self.vendorKey delegate:self];
     
+    //    self.agoraKit = [[AgoraRtcEngineKit alloc] initWithVendorKey:self.vendorKey error:^(AgoraRtcErrorCode errorCode) {
+    //        if (errorCode == AgoraRtc_Error_InvalidVendorKey) {
+    //            [self.agoraKit leaveChannel:nil];
+    //            [self.errorKeyAlert show];
+    //        }
+    //    }];
     [self.agoraKit setLogFilter:0];
-    
     [self setUpVideo];
     [self setUpBlocks];
 }
 
 - (void)joinChannel
 {
-    if(!_is_lecture_mode)[self showAlertLabelWithString:NSLocalizedString(@"Waiting for attendees", nil)];
-    else if(_selfUid!=10000) [self showAlertLabelWithString:NSLocalizedString(@"Waiting for lecturer", nil)];
     __weak __typeof(self) weakSelf = self;
     [self.agoraKit joinChannelByKey:nil channelName:self.channel info:nil uid:_selfUid joinSuccess:^(NSString *channel, NSUInteger uid, NSInteger elapsed) {
         
@@ -136,7 +139,7 @@
             [weakSelf.agoraKit disableVideo];
         }
         [UIApplication sharedApplication].idleTimerDisabled = YES;
-        
+        NSLog(@"success");
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
         [userDefaults setObject:weakSelf.vendorKey forKey:AGDKeyVendorKey];
     }];
@@ -153,14 +156,19 @@
         videoCanvas.renderMode = AgoraRtc_Render_Hidden;
         weakSelf.videoSelfView.frame = weakSelf.videoSelfView.superview.bounds;
         if([self.agoraKit setupLocalVideo:videoCanvas]<0) NSLog(@"failed local view");
+        [self showAlertLabelWithString:NSLocalizedString(@"wait_attendees", nil)];
     } else {
         if(_selfUid == 10000) {
+            _listenerCounter = 0;
+            [self showAlertLabelWithString: [NSString stringWithFormat:@"There are %@ people in the room", @(_listenerCounter)]];
             AgoraRtcVideoCanvas *videoCanvas = [[AgoraRtcVideoCanvas alloc] init];
             videoCanvas.uid = 10000;
             videoCanvas.view = self.videoMainView;
             videoCanvas.renderMode = AgoraRtc_Render_Hidden;
             //            weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
             if([self.agoraKit setupLocalVideo:videoCanvas]<0) NSLog(@"failed local view");
+        } else {
+            [self showAlertLabelWithString:NSLocalizedString(@"wait_lecturer", nil)];
         }
     }
 }
@@ -169,9 +177,8 @@
 {
     NSLog(@"local video display");
     __weak __typeof(self) weakSelf = self;
-    if(!_is_lecture_mode) weakSelf.videoSelfView.frame = weakSelf.videoSelfView.superview.bounds;
-    else if(_selfUid == 10000)weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
-    //weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
+    //weakSelf.videoSelfView.frame = weakSelf.videoSelfView.superview.bounds; // video view's autolayout cause crash
+    weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
 }
 
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine didJoinedOfUid:(NSUInteger)uid elapsed:(NSInteger)elapsed
@@ -191,6 +198,10 @@
         weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
         if([self.agoraKit setupRemoteVideo:videoCanvas]<0) NSLog(@"fail");
     }
+    if(_selfUid == 10000 && _is_lecture_mode) {
+        _listenerCounter++;
+        [self showAlertLabelWithString: [NSString stringWithFormat:@"There are %@ people in the room", @(_listenerCounter)]];
+    }
 }
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine didOfflineOfUid:(NSUInteger)uid reason:(AgoraRtcUserOfflineReason)reason
 {
@@ -201,15 +212,10 @@
     //        [weakSelf.uids removeObjectAtIndex:index];
     //        [weakSelf.collectionView deleteItemsAtIndexPaths:@[indexPath]];
     //    }
-    if(!_is_lecture_mode) {
-        [self showAlertLabelWithString:NSLocalizedString(@"Waiting for attendee", nil)];
-        weakSelf.videoMainView.hidden = true;
-    }
-    else {
-        if(uid == 10000 && _selfUid != 10000) {
-           [self showAlertLabelWithString:NSLocalizedString(@"Waiting for lecturer", nil)];
-            weakSelf.videoMainView.hidden = true;
-        }
+    if(!_is_lecture_mode || (uid == 10000 && _selfUid != 10000)) weakSelf.videoMainView.hidden = true;
+    if(_selfUid == 10000 && _is_lecture_mode) {
+        _listenerCounter--;
+        [self showAlertLabelWithString: [NSString stringWithFormat:@"There are %@ people in the room", @(_listenerCounter)]];
     }
 }
 
@@ -366,7 +372,6 @@
 
 - (IBAction)didClickSwitchButton:(UIButton *)btn
 {
-//    btn.selected = !btn.selected;
     [self.agoraKit switchCamera];
 }
 
