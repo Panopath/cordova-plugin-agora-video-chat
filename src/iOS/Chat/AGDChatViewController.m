@@ -56,6 +56,11 @@
 @end
 
 @implementation AGDChatViewController
+
+-(BOOL)prefersStatusBarHidden{
+    return YES;
+}
+
 -(id)initWithCoder:(NSCoder *)aDecoder{
     self = [super initWithCoder:aDecoder];
     return self;
@@ -84,6 +89,19 @@
     _selfUid=uid;
 }
 
+-(BOOL)shouldAutorotate
+{
+    
+    return NO;
+}
+
+-(NSUInteger)supportedInterfaceOrientation
+
+{
+    
+    return UIInterfaceOrientationPortrait;
+    
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -156,11 +174,12 @@
         videoCanvas.renderMode = AgoraRtc_Render_Hidden;
         weakSelf.videoSelfView.frame = weakSelf.videoSelfView.superview.bounds;
         if([self.agoraKit setupLocalVideo:videoCanvas]<0) NSLog(@"failed local view");
-        [self showAlertLabelWithString:NSLocalizedString(@"wait_attendees", nil)];
+        [self showAlertLabelWithString:NSLocalizedString(@"Waiting for the other attendees", nil)];
+        [[UIApplication sharedApplication].keyWindow bringSubviewToFront:weakSelf.videoSelfView];
     } else {
         if(_selfUid == 10000) {
             _listenerCounter = 0;
-            [self showAlertLabelWithString: [NSString stringWithFormat:@"There are %@ people in the room", @(_listenerCounter)]];
+            [self showAlertLabelWithString: @"Waiting for audience"];
             AgoraRtcVideoCanvas *videoCanvas = [[AgoraRtcVideoCanvas alloc] init];
             videoCanvas.uid = 10000;
             videoCanvas.view = self.videoMainView;
@@ -168,7 +187,7 @@
             //            weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
             if([self.agoraKit setupLocalVideo:videoCanvas]<0) NSLog(@"failed local view");
         } else {
-            [self showAlertLabelWithString:NSLocalizedString(@"wait_lecturer", nil)];
+            [self showAlertLabelWithString:NSLocalizedString(@"Waiting for the lecturer", nil)];
         }
     }
 }
@@ -191,16 +210,25 @@
     //
     //    [weakSelf.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:weakSelf.uids.count-1 inSection:0]]];
     if(!_is_lecture_mode || (_selfUid != 10000 && uid == 10000)) {
+        [self showAlertLabelWithString:@""];
+        self.videoMainView.hidden = false;
         AgoraRtcVideoCanvas *videoCanvas = [[AgoraRtcVideoCanvas alloc] init];
         videoCanvas.uid = uid;
         videoCanvas.view = self.videoMainView;
         videoCanvas.renderMode = AgoraRtc_Render_Hidden;
         weakSelf.videoMainView.frame = weakSelf.videoMainView.superview.bounds;
         if([self.agoraKit setupRemoteVideo:videoCanvas]<0) NSLog(@"fail");
+        //        if(!_is_lecture_mode) {
+        //            [[self.view superview] bringSubviewToFront:self.videoSelfView.superview];
+        //        }
     }
     if(_selfUid == 10000 && _is_lecture_mode) {
         _listenerCounter++;
-        [self showAlertLabelWithString: [NSString stringWithFormat:@"There are %@ people in the room", @(_listenerCounter)]];
+        if(_listenerCounter == 1) {
+            [self showAlertLabelWithString:@"There is 1 person in the room"];
+        } else {
+            [self showAlertLabelWithString: [NSString stringWithFormat:@"There are %@ people in the room", @(_listenerCounter)]];
+        }
     }
 }
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine didOfflineOfUid:(NSUInteger)uid reason:(AgoraRtcUserOfflineReason)reason
@@ -212,10 +240,22 @@
     //        [weakSelf.uids removeObjectAtIndex:index];
     //        [weakSelf.collectionView deleteItemsAtIndexPaths:@[indexPath]];
     //    }
-    if(!_is_lecture_mode || (uid == 10000 && _selfUid != 10000)) weakSelf.videoMainView.hidden = true;
-    if(_selfUid == 10000 && _is_lecture_mode) {
+    if(!_is_lecture_mode) {
+        weakSelf.videoMainView.hidden = true;
+        [self showAlertLabelWithString: @"Waiting for the other attendee"];
+    }
+    else if(uid == 10000 && _selfUid != 10000) {
+        weakSelf.videoMainView.hidden = true;
+        [self showAlertLabelWithString: @"Waiting for the lecturer"];
+    } else if(_selfUid == 10000 && _is_lecture_mode) {
         _listenerCounter--;
-        [self showAlertLabelWithString: [NSString stringWithFormat:@"There are %@ people in the room", @(_listenerCounter)]];
+        if(_listenerCounter == 0) {
+            [self showAlertLabelWithString:@"Waiting for audience"];
+        } else if (_listenerCounter == 1) {
+            [self showAlertLabelWithString:@"There is 1 person in the room"];
+        } else {
+            [self showAlertLabelWithString: [NSString stringWithFormat:@"There are %@ people in the room", @(_listenerCounter)]];
+        }
     }
 }
 
@@ -238,19 +278,19 @@
 
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine reportRtcStats:(AgoraRtcStats*)stats
 {
-    __weak __typeof(self) weakSelf = self;
-    // Update talk time
-    if (weakSelf.duration == 0 && !weakSelf.durationTimer) {
-        weakSelf.talkTimeLabel.text = @"00:00";
-        weakSelf.durationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:weakSelf selector:@selector(updateTalkTimeLabel) userInfo:nil repeats:YES];
-    }
-    
-    NSUInteger traffic = (stats.txBytes + stats.rxBytes - lastStat_.txBytes - lastStat_.rxBytes) / 1024;
-    NSUInteger speed = traffic / (stats.duration - lastStat_.duration);
-    NSString *trafficString = [NSString stringWithFormat:@"%@KB/s", @(speed)];
-    weakSelf.dataTrafficLabel.text = trafficString;
-    
-    lastStat_ = stats;
+    //    __weak __typeof(self) weakSelf = self;
+    //    // Update talk time
+    //    if (weakSelf.duration == 0 && !weakSelf.durationTimer) {
+    //        weakSelf.talkTimeLabel.text = @"00:00";
+    //        weakSelf.durationTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:weakSelf selector:@selector(updateTalkTimeLabel) userInfo:nil repeats:YES];
+    //    }
+    //
+    //    NSUInteger traffic = (stats.txBytes + stats.rxBytes - lastStat_.txBytes - lastStat_.rxBytes) / 1024;
+    //    NSUInteger speed = traffic / (stats.duration - lastStat_.duration);
+    //    NSString *trafficString = [NSString stringWithFormat:@"%@KB/s", @(speed)];
+    //    weakSelf.dataTrafficLabel.text = trafficString;
+    //
+    //    lastStat_ = stats;
 }
 
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine didOccurError:(AgoraRtcErrorCode)errorCode
@@ -385,7 +425,7 @@
         [weakSelf.navigationController popViewControllerAnimated:YES];
         [UIApplication sharedApplication].idleTimerDisabled = NO;
     }];
-    _completionHandler(@"hi");
+    _completionHandler(@"{\"eventName\":\"onLeaveChannel\", \"data\":\"{}\"}");
     [self dismissViewControllerAnimated:true completion:Nil];
 }
 
@@ -505,4 +545,5 @@
     [self.view removeFromSuperview];
     [self removeFromParentViewController];
 }
+
 @end

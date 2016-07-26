@@ -14,12 +14,12 @@
     NSString* callbackId = [command callbackId];
     NSString* name = [[command arguments] objectAtIndex:0];
     NSString* msg = [NSString stringWithFormat: @"Hello, %@", name];
-    
+
     _key = name;
     CDVPluginResult* result = [CDVPluginResult
                                resultWithStatus:CDVCommandStatus_OK
                                messageAsString:msg];
-    
+
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
@@ -28,9 +28,8 @@
 {
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"ChatView" bundle:nil];
     AGDChatViewController* chat = (AGDChatViewController*)[sb instantiateViewControllerWithIdentifier:@"ChatViewController"];
-    //[chat setKey:@"7358d38eb1714f7c9d8cc937fcdc4c73"];
     [chat setKey: _key];
-    [chat setChn:@"1"];
+    [chat setChn:[[command arguments] objectAtIndex:0]];
     [chat setCallback:__completionHandler];
     [chat setLecture:is_lecture_mode];
     [chat setUid:uid];
@@ -40,7 +39,7 @@
 
 -(void) joinChannel:(CDVInvokedUrlCommand *)command
 {
-    [self joinChannelImplementation:command mode:false uid:0];
+    [self joinChannelImplementation:command mode:false uid:(int)[[command arguments] objectAtIndex:1]];
 }
 
 -(void) startLecture:(CDVInvokedUrlCommand *)command
@@ -60,8 +59,7 @@
         CDVPluginResult* res = [CDVPluginResult
                                 resultWithStatus:CDVCommandStatus_OK
                                 messageAsString:message];
-        //    [self success: res callbackId:callbackID];
-        NSLog(message);
+        [res setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:res callbackId:callbackId];
     };
     __completionHandler = handler;

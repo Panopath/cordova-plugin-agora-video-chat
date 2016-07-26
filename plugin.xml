@@ -45,7 +45,6 @@
     <framework src="libz.dylib"></framework>
   </platform>
 
-
   <!-- android -->
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
