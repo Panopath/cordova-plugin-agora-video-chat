@@ -4,7 +4,7 @@
   
 ![Preview](http://7xn0vy.dl1.z0.glb.clouddn.com/cordova-agora.jpg)
 
-Cordova Agora Plugin is based on [Agora Media SDK 1.1.5 (http://agora.io/)](http://agora.io/) to achieve in-app real-time video chat for your cordova app.
+Cordova Agora Plugin is based on [Agora Media SDK 1.4.2 (http://agora.io/)](http://agora.io/) to achieve in-app real-time video chat for your cordova app.
 
 ## Installation
     cordova plugin add https://github.com/KevinWang15/cordova-plugin-agora-video-chat.git
@@ -38,16 +38,12 @@ Specifically, there are
 
 
 
-# 以下内容仅完成了安卓版本（iOS版本正在制作中）
-3. Leave Channel
-
-        agora.leaveChannel()
-
 ## 事件
 
 ### 使用方法：
 
-        document.addEventListener(EVENT_NAME,function(data){})
+        document.addEventListener('CordovaAgora.' + EVENT_NAME,function(data){})
+        //e.g. document.addEventListener('CordovaAgora.onLeaveChannel',function(){console.log('User has left channel!');});
 
 |EVENT_NAME|data|
 |---|---|--|
@@ -77,6 +73,8 @@ Specifically, there are
 
 具体请参考 agora.io 的文档
 
+**注意：iOS版本现在只支持```CordovaAgora.onLeaveChannel```，而且没有额外的参数**
+
 ### 在Console中打出所有的事件
 
     agora.startLoggingAllEvents()
@@ -84,7 +82,6 @@ Specifically, there are
 ### 在Console中停止打出所有的事件
 
     agora.stopLoggingAllEvents()
-
 
 ## 讲座模式
 
@@ -95,6 +92,12 @@ Specifically, there are
     //作为主讲人
     agora.joinLecture(channel);
     //作为听众
+
+
+# 以下内容仅完成了安卓版本（iOS版本正在制作中）
+3. Leave Channel
+
+        agora.leaveChannel()
 
 ## 其他
 ### Android 6.0+ 权限问题
